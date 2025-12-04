@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Ingresso {{ID}}</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #0a0a0a;
+        color: white;
+        padding: 20px;
+    }
+    .card {
+        width: 420px;
+        margin: auto;
+        background: linear-gradient(135deg, #1e1e1e, #3d3d3d);
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 0 15px #000000aa;
+    }
+    h1 { text-align: center; margin: 0; }
+    .info { margin-top: 15px; }
+    .qr {
+        text-align: center;
+        margin-top: 25px;
+    }
+    .qr img { width: 200px; }
+</style>
+</head>
+<body>
+
+<div class="card">
+    <h1>REVEILLON ORLA 90</h1>
+    <p style="text-align:center; font-size: 18px;">31/12/2025 — 22h às 03h</p>
+
+    <div class="info">
+        <p><strong>Ingresso:</strong> {{ID}}</p>
+        <p><strong>Nome:</strong> {{NOME}}</p>
+        <p><strong>Lote:</strong> {{LOTE}}</p>
+        <p><strong>Valor:</strong> R$ {{VALOR}}</p>
+        
+        <p><strong>Local:</strong><br>
+        Rua Hélio Manchon, 86 — Quadra 124 — Lote 01<br>
+        Cordeirinho — Maricá/RJ (Antiga Rua 90)</p>
+
+        <p><strong>Buffet liberado</strong><br>
+        Bebidas vendidas à parte</p>
+
+        <p><strong>Token:</strong> {{TOKEN}}</p>
+    </div>
+
+    <div class="qr">
+        <img src="{{QR_URL}}" alt="QR Code">
+    </div>
+</div>
+
+</body>
+</html>

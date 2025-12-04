@@ -1,110 +1,45 @@
-import uuid
+import pandas as pd
+import qrcode
 import os
+import uuid
 
-# CONFIGURAÇÕES DO EVENTO
-EVENTO = "Ingresso Reveillon Orla 90"
-DATA_EVENTO = "31/12/2025"
-LOCAL = "Rua 90 – Cordeirinho, Maricá"
-PRECO = "R$ 150,00"
+df = pd.read_excel("ingressos.xlsx")
 
-# URL BASE PARA VALIDAÇÃO
-URL_BASE = "https://meusite.com/validar?token="
+os.makedirs("docs", exist_ok=True)
 
-# QUANTIDADE TOTAL
-TOTAL = 150
+TEMPLATE = ""
+with open("template_ingresso.html", "r", encoding="utf-8") as f:
+    TEMPLATE = f.read()
 
-# LOTES
-LOTES = {
-    1: (1, 50),
-    2: (51, 100),
-    3: (101, 150)
+LOTE_VALOR = {
+    "1": "185,00",
+    "2": "195,00",
+    "3": "215,00"
 }
 
-# TEMPLATE HTML
-HTML_TEMPLATE = """
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-<meta charset="UTF-8">
-<title>Ingresso {id:03d}</title>
-<style>
-body {{
-    font-family: Arial, sans-serif;
-    padding: 20px;
-    background: #f3f3f3;
-}}
-.card {{
-    width: 550px;
-    background: #fff;
-    border: 2px solid #000;
-    padding: 20px;
-    margin: auto;
-}}
-h2 {{
-    margin-top: 0;
-}}
-.qr {{
-    text-align: center;
-    margin: 20px 0;
-}}
-</style>
-</head>
-<body>
-<div class="card">
-    <h2>{evento}</h2>
+for index, row in df.iterrows():
+    ingresso_id = row["ID"]
+    token = row["TOKEN"]
+    nome = row["NOME"]
+    lote = str(row["LOTE"])
+    valor = LOTE_VALOR.get(lote, "0")
 
-    <p><b>Data:</b> {data}</p>
-    <p><b>Local:</b> {local}</p>
-    <p><b>Preço:</b> {preco}</p>
+    qr_url = f"https://meusite.com/validar?token={token}"
 
-    <p><b>Lote:</b> {lote}</p>
-    <p><b>ID:</b> {id}</p>
-    <p><b>Token:</b> {token}</p>
+    # gerar QR
+    img = qrcode.make(qr_url)
+    qr_path = f"docs/qr_{ingresso_id}.png"
+    img.save(qr_path)
 
-    <div class="qr">
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data={url}" width="250">
-    </div>
+    html_content = TEMPLATE\
+        .replace("{{ID}}", str(ingresso_id))\
+        .replace("{{NOME}}", nome)\
+        .replace("{{TOKEN}}", token)\
+        .replace("{{LOTE}}", lote)\
+        .replace("{{VALOR}}", valor)\
+        .replace("{{QR_URL}}", f"qr_{ingresso_id}.png")
 
-    <p><b>Validação:</b> {url}</p>
-</div>
-</body>
-</html>
-"""
+    with open(f"docs/ingresso_{ingresso_id}.html", "w", encoding="utf-8") as f:
+        f.write(html_content)
 
-# CRIAR PASTA PARA ARQUIVOS
-output_folder = "ingressos_html"
-os.makedirs(output_folder, exist_ok=True)
-
-# GERAR INGRESSOS
-for i in range(1, TOTAL + 1):
-    token = str(uuid.uuid4())
-    url = URL_BASE + token
-
-    # IDENTIFICAR O LOTE
-    for lote, intervalo in LOTES.items():
-        inicio, fim = intervalo
-        if inicio <= i <= fim:
-            lote_atual = lote
-            break
-
-    # GERAR HTML
-    html = HTML_TEMPLATE.format(
-        id=i,
-        token=token,
-        url=url,
-        evento=EVENTO,
-        data=DATA_EVENTO,
-        local=LOCAL,
-        preco=PRECO,
-        lote=lote_atual
-    )
-
-    # NOME DO ARQUIVO FINAL
-    filename = os.path.join(output_folder, f"ingresso_{i:03d}.html")
-
-    # SALVAR
-    with open(filename, "w", encoding="utf-8") as f:
-        f.write(html)
-
-print("✔ 150 ingressos gerados com sucesso!")
-print(f"Pasta criada: {output_folder}/")
+print("Ingressos gerados!")
